@@ -6,8 +6,27 @@ module Bundler
   class CLI < Thor
     include Thor::Actions
 
-    def initialize(*)
+    # Receives an array of args and returns two arrays, one with bundler
+    # options and one with the command name and it's options/arguments.
+    def self.split_for_exec(args)
+      bundler_opts = []
+      args.each do |item|
+        break unless item =~ /^-/
+        bundler_opts << item
+      end
+      return bundler_opts, args[Range.new(bundler_opts.size, -1)]
+    end
+
+    def initialize(args, opts, config)
+
+      if config[:current_task].name == "exec"
+        bundler_opts, cmd = CLI::split_for_exec (args + opts)
+        opts.replace bundler_opts
+        args.replace cmd
+      end
+
       super
+
       the_shell = (options["no-color"] ? Thor::Shell::Basic.new : shell)
       Bundler.ui = UI::Shell.new(the_shell)
       Bundler.ui.debug! if options["verbose"]

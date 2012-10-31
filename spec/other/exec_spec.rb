@@ -1,4 +1,12 @@
 require "spec_helper"
+require "bundler/cli"
+
+describe "split_for_exec" do
+  it "splits args into bundler options and a command with it's arguments" do
+    opts_args = Bundler::CLI.split_for_exec ["--foo", "command", "--bar"]
+    opts_args.should eq([["--foo"], ["command", "--bar"]])
+  end
+end
 
 describe "bundle exec" do
   before :each do
@@ -37,6 +45,18 @@ describe "bundle exec" do
     install_gemfile 'gem "rack"'
     bundle "exec echo exec"
     out.should == "exec"
+  end
+
+  it "accepts --verbose" do
+    install_gemfile 'gem "rack"'
+    bundle "exec --verbose echo foobar"
+    out.should == "foobar"
+  end
+
+  it "passes --verbose to command if it is given after the command" do
+    install_gemfile 'gem "rack"'
+    bundle "exec echo --verbose"
+    out.should == "--verbose"
   end
 
   it "handles different versions in different bundles" do
