@@ -11,10 +11,12 @@ module Bundler
     def self.split_for_exec(args)
       bundler_opts = []
       args.each do |item|
-        break unless item =~ /^-/
+        break unless (item =~ /^-/ && item != "--")
         bundler_opts << item
       end
-      return bundler_opts, args[Range.new(bundler_opts.size, -1)]
+      command = args[Range.new(bundler_opts.size, -1)]
+      command.shift if command.first == "--"
+      return bundler_opts, command
     end
 
     def initialize(args, opts, config)
