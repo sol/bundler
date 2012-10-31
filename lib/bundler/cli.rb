@@ -12,11 +12,14 @@ module Bundler
       bundler_opts = []
 
       args.each do |item|
-        break unless item =~ /^-/
+        break unless (item =~ /^-/ && item != "--")
         bundler_opts << item
       end
 
-      return bundler_opts, args[Range.new(bundler_opts.size, -1)]
+      command = args[Range.new(bundler_opts.size, -1)]
+      command.shift if command.first == "--"
+
+      return bundler_opts, command
     end
 
     def initialize(args, opts, config)
@@ -36,7 +39,7 @@ module Bundler
       Bundler.rubygems.ui = UI::RGProxy.new(Bundler.ui)
     end
 
-    check_unknown_options!(:except => [:config, :exec])
+    check_unknown_options!(:except => [:config, :exec]) # FIXME: could we remove :exec
 
     default_task :install
     class_option "no-color", :type => :boolean, :banner => "Disable colorization in output"

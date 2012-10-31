@@ -6,6 +6,11 @@ describe "split_for_exec" do
     opts_args = Bundler::CLI.split_for_exec ["--foo", "command", "--bar"]
     opts_args.should eq([["--foo"], ["command", "--bar"]])
   end
+
+  it 'treats everything after "--" as command/arguments' do
+    opts_args = Bundler::CLI.split_for_exec ["--foo", "--", "--bar"]
+    opts_args.should eq([["--foo"], ["--bar"]])
+  end
 end
 
 describe "bundle exec" do
@@ -59,6 +64,19 @@ describe "bundle exec" do
     install_gemfile 'gem "rack"'
     bundle "exec echo --verbose"
     out.should == "--verbose"
+  end
+
+  it "can run a command named --verbose" do
+    install_gemfile 'gem "rack"'
+
+    File.open("--verbose", 'w') do |f|
+      f.write "echo foobar"
+    end
+    system "chmod +x -- --verbose"
+    ENV['PATH'] = "."
+
+    bundle "exec -- --verbose"
+    out.should == "foobar"
   end
 
   it "handles different versions in different bundles" do
