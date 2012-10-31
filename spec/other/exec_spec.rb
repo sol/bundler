@@ -79,6 +79,14 @@ describe "bundle exec" do
     out.should == "foobar"
   end
 
+  it "barks on invalid flags" do
+    install_gemfile 'gem "rack"'
+
+    bundle "exec --foo echo foobar"
+    err.should == "Unknown switches '--foo'"
+    out.should == ""
+  end
+
   it "handles different versions in different bundles" do
     build_repo2 do
       build_gem "rack_two", "1.0.0" do |s|
