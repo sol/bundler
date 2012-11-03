@@ -35,7 +35,7 @@ module Bundler
       Bundler.rubygems.ui = UI::RGProxy.new(Bundler.ui)
     end
 
-    check_unknown_options!(:except => [:config, :exec])
+    check_unknown_options! :except => :config
 
     default_task :install
     class_option "no-color", :type => :boolean, :banner => "Disable colorization in output"
